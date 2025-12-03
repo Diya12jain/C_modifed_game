@@ -1,0 +1,126 @@
+#include <stdio.h>
+#include <conio.h>
+#include <windows.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define OBSTACLE_COUNT 2   
+#define MAX_LIVES 3        
+
+void playGame(); 
+
+int main() {
+    char choice;
+
+    do {
+        system("cls");
+        printf("=== CAR DODGE GAME ===\n");
+        printf("1. Start Game\n");
+        printf("2. Exit\n");
+        printf("Enter choice: ");
+        choice = getch();
+
+        if (choice == '1') {
+            playGame(); 
+
+            char c;
+            do {
+                system("cls");
+                printf("Do you want to play again? (y/n): ");
+                c = getch();
+                if (c == 'y' || c == 'Y') {
+                    playGame();
+                } else if (c == 'n' || c == 'N') {
+                    printf("\nThank you for playing!\n");
+                    exit(0);
+                }
+            } while (c != 'y' && c != 'Y' && c != 'n' && c != 'N');
+
+        } else if (choice == '2') {
+            printf("\nExiting...\n");
+            break;
+        }
+    } while (1);
+
+    return 0;
+}
+
+void playGame() {
+    srand(time(0));
+
+    int x = 1;                     
+    int step[OBSTACLE_COUNT];      
+    int obstaclePos[OBSTACLE_COUNT]; 
+    int score = 0;                 
+    int lives = MAX_LIVES;       
+    int speed = 120;               
+    
+    for (int i = 0; i < OBSTACLE_COUNT; i++) {
+        step[i] = rand() % 5;
+        obstaclePos[i] = rand() % 3;
+    }
+
+    while (1) {
+        if (_kbhit()) {
+            char ch = getch();
+            if (ch == 75 && x > 0) x--;  
+            if (ch == 77 && x < 2) x++;  
+        }
+
+        system("cls");
+        printf("\n   CAR DODGE GAME (LIVES & DIFFICULTY)\n");
+        printf("|--- --- ---|\n");
+
+        for (int i = 0; i < 10; i++) {
+            int obstacleHere = -1;
+
+            for (int j = 0; j < OBSTACLE_COUNT; j++) {
+                if (step[j] == i) {
+                    obstacleHere = j;
+                    break;
+                }
+            }
+
+            if (obstacleHere != -1) {
+                int lane = obstaclePos[obstacleHere];
+                if (lane == 0) printf("| %c        |\n", 1);
+                else if (lane == 1) printf("|     %c    |\n", 1);
+                else if (lane == 2) printf("|        %c |\n", 1);
+            } else {
+                printf("|           |\n");
+            }
+        }
+
+        if (x == 0) printf("| %c        |\n", 6);
+        else if (x == 1) printf("|     %c    |\n", 6);
+        else if (x == 2) printf("|        %c |\n", 6);
+
+        printf("\nScore: %d   Lives: %d\n", score, lives);
+
+        for (int i = 0; i < OBSTACLE_COUNT; i++) {
+            if (step[i] == 10 && x == obstaclePos[i]) {
+                lives--;
+                step[i] = 0;
+                obstaclePos[i] = rand() % 3;
+                if (lives == 0) {
+                    printf("\nGAME OVER!\n");
+                    printf("Press any key to continue...\n");
+                    getch();
+                    return; 
+                }
+            }
+        }
+
+        Sleep(speed);
+
+        for (int i = 0; i < OBSTACLE_COUNT; i++) {
+            step[i]++;
+            if (step[i] > 10) {
+                step[i] = 0;
+                obstaclePos[i] = rand() % 3;
+                score++;
+                if (score % 5 == 0 && speed > 50) speed -= 10; 
+            }
+        }
+    }
+}
